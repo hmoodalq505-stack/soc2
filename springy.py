@@ -1038,18 +1038,14 @@ ax6.set_facecolor(SOC_COLORS['card'])
 prob_benign = y_test_prob_best[y_test == 0]
 prob_attack = y_test_prob_best[y_test == 1]
 if len(np.unique(prob_attack)) > 1:
-    ax6.hist(prob_attack, bins=50, alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
+    ax6.hist(prob_attack, bins=min(50, len(np.unique(prob_attack))), alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
 else:
-    ax6.axvline(prob_attack.mean(), color=SOC_COLORS['critical'], linestyle='--', label='ATTACK')
+    ax6.axvline(prob_attack.mean() if len(prob_attack)>0 else 0, color=SOC_COLORS['critical'], linestyle='--', label='ATTACK')
 
 if len(np.unique(prob_benign)) > 1:
-    ax6.hist(prob_benign, bins=50, alpha=0.7, color=SOC_COLORS['low'], label='BENIGN', density=True)
+    ax6.hist(prob_benign, bins=min(50, len(np.unique(prob_benign))), alpha=0.7, color=SOC_COLORS['low'], label='BENIGN', density=True)
 else:
-    ax6.axvline(prob_benign.mean(), color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
-else:
-    ax6.axvline(prob_benign.mean(), color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
-else:
-    ax6.axvline(prob_benign.mean(), color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
+    ax6.axvline(prob_benign.mean() if len(prob_benign)>0 else 0, color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
 ax6.axvline(x=BEST_THRESHOLD, color=SOC_COLORS['medium'], linestyle='--', linewidth=2, label=f'Threshold={BEST_THRESHOLD:.3f}')
 ax6.set_xlabel('Attack Probability', color=SOC_COLORS['text'])
 ax6.set_ylabel('Density', color=SOC_COLORS['text'])
