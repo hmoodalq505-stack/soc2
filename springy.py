@@ -1035,22 +1035,24 @@ for bar, val in zip(bars5, metric_vals):
 
 ax6 = fig.add_subplot(gs[1, 2])
 ax6.set_facecolor(SOC_COLORS['card'])
-prob_benign = y_test_prob_best[y_test == 0]
-prob_attack = y_test_prob_best[y_test == 1]
-prob_attack = prob_attack[np.isfinite(prob_attack)]
-prob_benign = prob_benign[np.isfinite(prob_benign)]
+try:
+    prob_benign = prob_benign[np.isfinite(prob_benign)]
+    prob_attack = prob_attack[np.isfinite(prob_attack)]
 
-if len(prob_attack) > 0 and len(np.unique(prob_attack)) > 1:
-    ax6.hist(prob_attack, bins=min(30, len(np.unique(prob_attack))), alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
-elif len(prob_attack) > 0:
-    ax6.axvline(prob_attack.mean(), color=SOC_COLORS['critical'], linestyle='--', label='ATTACK')
+    if len(prob_attack) > 1:
+        ax6.hist(prob_attack, bins=30, alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
+    elif len(prob_attack) == 1:
+        ax6.axvline(prob_attack[0], color=SOC_COLORS['critical'], linestyle='--', label='ATTACK')
 
-if len(prob_benign) > 0 and len(np.unique(prob_benign)) > 1:
-    ax6.hist(prob_benign, bins=min(30, len(np.unique(prob_benign))), alpha=0.7, color=SOC_COLORS['low'], label='BENIGN', density=True)
-elif len(prob_benign) > 0:
-    ax6.axvline(prob_benign.mean(), color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
-             color=SOC_COLORS['cyan'], fontsize=14, fontweight='bold')
-plt.savefig('evaluation_dashboard.png', dpi=100, bbox_inches='tight', facecolor=SOC_COLORS['bg'])
+    if len(prob_benign) > 1:
+        ax6.hist(prob_benign, bins=30, alpha=0.7, color=SOC_COLORS['low'], label='BENIGN', density=True)
+    elif len(prob_benign) == 1:
+        ax6.axvline(prob_benign[0], color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
+        
+    ax6.set_title('Prediction Probability Distribution')
+    ax6.legend()
+except Exception as e:
+    print(f"Skipping plot due to: {e}")
 plt.show()
 
 print('Feature Importance Analysis...')
