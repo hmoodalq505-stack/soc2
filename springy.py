@@ -605,13 +605,13 @@ if len(numeric_cols_final) > MAX_FEATURES:
     numeric_cols_final = importances.nlargest(MAX_FEATURES).index.tolist()
     print(f'Feature selection applied: reduced to {len(numeric_cols_final)} features')
 
-X = df[numeric_cols_final].values
-y = df['binary_label'].values
-y_multi = df[TARGET_COL].values
+X = df[numeric_cols_final]
+y = df['binary_label']
+y_multi = df[TARGET_COL]
 
 print(f'Feature matrix shape: {X.shape}')
 print(f'Class balance: {np.bincount(y)}')
-
+# تنظيف البيانات (الأسطر 615-617)
 X_clean = X.apply(pd.to_numeric, errors='coerce').fillna(0)
 y_clean = pd.to_numeric(y, errors='coerce').fillna(0)
 y_multi_clean = pd.to_numeric(y_multi, errors='coerce').fillna(0)
@@ -621,6 +621,10 @@ X_temp, X_test, y_temp, y_test, y_multi_temp, y_multi_test = train_test_split(
     test_size=0.15, random_state=42, stratify=y_clean
 )
 
+X_train, X_val, y_train, y_val, y_multi_train, y_multi_val = train_test_split(
+    X_temp, y_temp, y_multi_temp, 
+    test_size=0.15, random_state=42, stratify=y_temp
+)
 X_train, X_val, y_train, y_val, y_multi_train, y_multi_val = train_test_split(
     X_temp, y_temp, y_multi_temp, 
     test_size=0.15, random_state=42, stratify=y_temp
