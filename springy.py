@@ -1053,7 +1053,7 @@ try:
     ax6.legend()
 except Exception as e:
     print(f"Skipping plot due to: {e}")
-plt.show()
+st.pyplot(fig)
 
 print('Feature Importance Analysis...')
 
