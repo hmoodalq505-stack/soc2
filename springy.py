@@ -1033,6 +1033,7 @@ for bar, val in zip(bars5, metric_vals):
     ax5.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
              f'{val:.4f}', ha='center', color=SOC_COLORS['text'], fontsize=9)
 
+plt.clf()
 ax6 = fig.add_subplot(gs[1, 2])
 ax6.set_facecolor(SOC_COLORS['card'])
 try:
