@@ -1037,8 +1037,16 @@ plt.clf()
 ax6 = fig.add_subplot(gs[1, 2])
 ax6.set_facecolor(SOC_COLORS['card'])
 try:
-    prob_benign = prob_benign[np.isfinite(prob_benign)]
-    prob_attack = prob_attack[np.isfinite(prob_attack)]
+prob_attack_clean = prob_attack[np.isfinite(prob_attack)]
+prob_benign_clean = prob_benign[np.isfinite(prob_benign)]
+
+if len(prob_attack_clean) > 0:
+    n_bins = min(50, len(np.unique(prob_attack_clean))) if len(np.unique(prob_attack_clean)) > 1 else 1
+    ax6.hist(prob_attack_clean, bins=n_bins, alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
+
+if len(prob_benign_clean) > 0:
+    n_bins = min(50, len(np.unique(prob_benign_clean))) if len(np.unique(prob_benign_clean)) > 1 else 1
+    ax6.hist(prob_benign_clean, bins=n_bins, alpha=0.7, color=SOC_COLORS['low'], label='BENIGN', density=True)
 
     if len(prob_attack) > 1:
         ax6.hist(prob_attack, bins=30, alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
