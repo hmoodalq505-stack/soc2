@@ -32,7 +32,6 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn.inspection import permutation_importance
 import xgboost as xgb
 import lightgbm as lgb
-!pip install catboost > /dev/null
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
