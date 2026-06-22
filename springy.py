@@ -612,13 +612,17 @@ y_multi = df[TARGET_COL].values
 print(f'Feature matrix shape: {X.shape}')
 print(f'Class balance: {np.bincount(y)}')
 
+X_clean = X.apply(pd.to_numeric, errors='coerce').fillna(0)
+y_clean = pd.to_numeric(y, errors='coerce').fillna(0)
+y_multi_clean = pd.to_numeric(y_multi, errors='coerce').fillna(0)
+
 X_temp, X_test, y_temp, y_test, y_multi_temp, y_multi_test = train_test_split(
-    X.astype(float), y.astype(float), y_multi.astype(float), 
-    test_size=0.15, random_state=42, stratify=y
+    X_clean, y_clean, y_multi_clean, 
+    test_size=0.15, random_state=42, stratify=y_clean
 )
 
 X_train, X_val, y_train, y_val, y_multi_train, y_multi_val = train_test_split(
-    X_temp.astype(float), y_temp.astype(float), y_multi_temp.astype(float), 
+    X_temp, y_temp, y_multi_temp, 
     test_size=0.15, random_state=42, stratify=y_temp
 )
 print(f'Train size:      {X_train.shape[0]:,}')
