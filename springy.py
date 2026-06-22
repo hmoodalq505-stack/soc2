@@ -1048,6 +1048,8 @@ else:
     ax6.axvline(prob_benign.mean(), color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
 else:
     ax6.axvline(prob_benign.mean(), color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
+else:
+    ax6.axvline(prob_benign.mean(), color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
 ax6.axvline(x=BEST_THRESHOLD, color=SOC_COLORS['medium'], linestyle='--', linewidth=2, label=f'Threshold={BEST_THRESHOLD:.3f}')
 ax6.set_xlabel('Attack Probability', color=SOC_COLORS['text'])
 ax6.set_ylabel('Density', color=SOC_COLORS['text'])
