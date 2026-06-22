@@ -1037,7 +1037,6 @@ ax6 = fig.add_subplot(gs[1, 2])
 ax6.set_facecolor(SOC_COLORS['card'])
 prob_benign = y_test_prob_best[y_test == 0]
 prob_attack = y_test_prob_best[y_test == 1]
-# التأكد من وجود تنوع في البيانات قبل الرسم لتجنب ValueError
 if len(np.unique(prob_attack)) > 1:
     ax6.hist(prob_attack, bins=50, alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
 else:
