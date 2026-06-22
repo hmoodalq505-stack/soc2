@@ -734,7 +734,7 @@ scatter_idx = np.random.choice(len(X_test_scaled), min(3000, len(X_test_scaled))
 from sklearn.decomposition import PCA
 pca = PCA(n_components=2, random_state=42)
 X_2d = pca.fit_transform(X_test_scaled[scatter_idx])
-colors_scatter = [SOC_COLORS['critical'] if y == 1 else SOC_COLORS['low'] for y in y_test[scatter_idx]]
+colors_scatter = [SOC_COLORS['critical'] if y == 1 else SOC_COLORS['low'] for y in y_test.iloc[scatter_idx]]
 ax.scatter(X_2d[:, 0], X_2d[:, 1], c=colors_scatter, alpha=0.4, s=8)
 from matplotlib.patches import Patch
 legend_els = [Patch(facecolor=SOC_COLORS['low'], label='BENIGN'),
