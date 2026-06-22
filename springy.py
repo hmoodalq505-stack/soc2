@@ -32,6 +32,7 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn.inspection import permutation_importance
 import xgboost as xgb
 import lightgbm as lgb
+!pip install catboost > /dev/null
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
@@ -44,12 +45,7 @@ print('All libraries imported successfully')
 # from google.colab import drive
 # drive.mount('/content/drive')
 
-import requests
-
-url = "https://raw.githubusercontent.com/joolsa/CICIDS2017-Cleaned/main/cicids2017_cleaned.csv"
-response = requests.get(url)
-with open("cicids2017_cleaned.csv", "wb") as f:
-    f.write(response.content)
+!wget -O cicids2017_cleaned.csv "https://raw.githubusercontent.com/joolsa/CICIDS2017-Cleaned/main/cicids2017_cleaned.csv"
 
 
 
@@ -605,30 +601,20 @@ if len(numeric_cols_final) > MAX_FEATURES:
     numeric_cols_final = importances.nlargest(MAX_FEATURES).index.tolist()
     print(f'Feature selection applied: reduced to {len(numeric_cols_final)} features')
 
-X = df[numeric_cols_final]
-y = df['binary_label']
-y_multi = df[TARGET_COL]
+X = df[numeric_cols_final].values
+y = df['binary_label'].values
+y_multi = df[TARGET_COL].values
 
 print(f'Feature matrix shape: {X.shape}')
 print(f'Class balance: {np.bincount(y)}')
-# تنظيف البيانات (الأسطر 615-617)
-X_clean = X.apply(pd.to_numeric, errors='coerce').fillna(0)
-y_clean = pd.to_numeric(y, errors='coerce').fillna(0)
-y_multi_clean = pd.to_numeric(y_multi, errors='coerce').fillna(0)
 
 X_temp, X_test, y_temp, y_test, y_multi_temp, y_multi_test = train_test_split(
-    X_clean, y_clean, y_multi_clean, 
-    test_size=0.15, random_state=42, stratify=y_clean
+    X, y, y_multi, test_size=0.15, random_state=42, stratify=y
+)
+X_train, X_val, y_train, y_val, y_multi_train, y_multi_val = train_test_split(
+    X_temp, y_temp, y_multi_temp, test_size=0.15, random_state=42, stratify=y_temp
 )
 
-X_train, X_val, y_train, y_val, y_multi_train, y_multi_val = train_test_split(
-    X_temp, y_temp, y_multi_temp, 
-    test_size=0.15, random_state=42, stratify=y_temp
-)
-X_train, X_val, y_train, y_val, y_multi_train, y_multi_val = train_test_split(
-    X_temp, y_temp, y_multi_temp, 
-    test_size=0.15, random_state=42, stratify=y_temp
-)
 print(f'Train size:      {X_train.shape[0]:,}')
 print(f'Validation size: {X_val.shape[0]:,}')
 print(f'Test size:       {X_test.shape[0]:,}')
@@ -734,7 +720,7 @@ scatter_idx = np.random.choice(len(X_test_scaled), min(3000, len(X_test_scaled))
 from sklearn.decomposition import PCA
 pca = PCA(n_components=2, random_state=42)
 X_2d = pca.fit_transform(X_test_scaled[scatter_idx])
-colors_scatter = [SOC_COLORS['critical'] if y == 1 else SOC_COLORS['low'] for y in y_test.iloc[scatter_idx]]
+colors_scatter = [SOC_COLORS['critical'] if y == 1 else SOC_COLORS['low'] for y in y_test[scatter_idx]]
 ax.scatter(X_2d[:, 0], X_2d[:, 1], c=colors_scatter, alpha=0.4, s=8)
 from matplotlib.patches import Patch
 legend_els = [Patch(facecolor=SOC_COLORS['low'], label='BENIGN'),
@@ -1033,36 +1019,22 @@ for bar, val in zip(bars5, metric_vals):
     ax5.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
              f'{val:.4f}', ha='center', color=SOC_COLORS['text'], fontsize=9)
 
-plt.clf()
 ax6 = fig.add_subplot(gs[1, 2])
 ax6.set_facecolor(SOC_COLORS['card'])
-try:
-prob_attack_clean = prob_attack[np.isfinite(prob_attack)]
-prob_benign_clean = prob_benign[np.isfinite(prob_benign)]
+prob_benign = y_test_prob_best[y_test == 0]
+prob_attack = y_test_prob_best[y_test == 1]
+ax6.hist(prob_benign, bins=50, alpha=0.7, color=SOC_COLORS['low'], label='BENIGN', density=True)
+ax6.hist(prob_attack, bins=50, alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
+ax6.axvline(x=BEST_THRESHOLD, color=SOC_COLORS['medium'], linestyle='--', linewidth=2, label=f'Threshold={BEST_THRESHOLD:.3f}')
+ax6.set_xlabel('Attack Probability', color=SOC_COLORS['text'])
+ax6.set_ylabel('Density', color=SOC_COLORS['text'])
+ax6.set_title('Prediction Probability Distribution', color=SOC_COLORS['purple'], fontsize=12, fontweight='bold')
+ax6.legend(facecolor=SOC_COLORS['bg'], labelcolor=SOC_COLORS['text'])
 
-if len(prob_attack_clean) > 0:
-    n_bins = min(50, len(np.unique(prob_attack_clean))) if len(np.unique(prob_attack_clean)) > 1 else 1
-    ax6.hist(prob_attack_clean, bins=n_bins, alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
-
-if len(prob_benign_clean) > 0:
-    n_bins = min(50, len(np.unique(prob_benign_clean))) if len(np.unique(prob_benign_clean)) > 1 else 1
-    ax6.hist(prob_benign_clean, bins=n_bins, alpha=0.7, color=SOC_COLORS['low'], label='BENIGN', density=True)
-
-    if len(prob_attack) > 1:
-        ax6.hist(prob_attack, bins=30, alpha=0.7, color=SOC_COLORS['critical'], label='ATTACK', density=True)
-    elif len(prob_attack) == 1:
-        ax6.axvline(prob_attack[0], color=SOC_COLORS['critical'], linestyle='--', label='ATTACK')
-
-    if len(prob_benign) > 1:
-        ax6.hist(prob_benign, bins=30, alpha=0.7, color=SOC_COLORS['low'], label='BENIGN', density=True)
-    elif len(prob_benign) == 1:
-        ax6.axvline(prob_benign[0], color=SOC_COLORS['low'], linestyle='--', label='BENIGN')
-        
-    ax6.set_title('Prediction Probability Distribution')
-    ax6.legend()
-except Exception as e:
-    print(f"Skipping plot due to: {e}")
-st.pyplot(fig)
+plt.suptitle(f'Complete Evaluation Dashboard | Best Model: {BEST_MODEL_NAME}',
+             color=SOC_COLORS['cyan'], fontsize=14, fontweight='bold')
+plt.savefig('evaluation_dashboard.png', dpi=100, bbox_inches='tight', facecolor=SOC_COLORS['bg'])
+plt.show()
 
 print('Feature Importance Analysis...')
 
