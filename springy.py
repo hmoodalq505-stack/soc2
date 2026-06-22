@@ -44,7 +44,12 @@ print('All libraries imported successfully')
 # from google.colab import drive
 # drive.mount('/content/drive')
 
-!wget -O cicids2017_cleaned.csv "https://raw.githubusercontent.com/joolsa/CICIDS2017-Cleaned/main/cicids2017_cleaned.csv"
+import requests
+
+url = "https://raw.githubusercontent.com/joolsa/CICIDS2017-Cleaned/main/cicids2017_cleaned.csv"
+response = requests.get(url)
+with open("cicids2017_cleaned.csv", "wb") as f:
+    f.write(response.content)
 
 
 
